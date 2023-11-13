@@ -14,8 +14,8 @@ public class Neo4jEmbeddingStoreExample {
      * To run this example, ensure you have Neo4j running locally, 
      *  and change uri, username and password strings consistently.
      * If not, then:
-     * - Execute "docker pull neo4j:5.13.0"
-     * - Execute "docker run -d -p 7687:7687 --env NEO4J_AUTH=neo4j/password1234 neo4j:5.13.0"
+     * - Execute "docker pull neo4j:latest"
+     * - Execute "docker run -d -p 7687:7687 --env NEO4J_AUTH=neo4j/password1234 neo4j:latest"
      * - Wait until Neo4j is ready to serve (may take a few minutes)
      */
 
