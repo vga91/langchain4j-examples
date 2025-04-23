@@ -5,7 +5,7 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import dev.langchain4j.store.embedding.EmbeddingStore;
-import dev.langchain4j.store.embedding.neo4j.Neo4jEmbeddingStore;
+import dev.langchain4j.community.store.embedding.neo4j.Neo4jEmbeddingStore;
 import org.testcontainers.containers.Neo4jContainer;
 
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
 public class Neo4jEmbeddingStoreExample {
 
     public static void main(String[] args) {
-        try (Neo4jContainer<?> neo4j = new Neo4jContainer<>("neo4j:5")) {
+        try (Neo4jContainer<?> neo4j = new Neo4jContainer<>("neo4j:5.26")) {
             neo4j.start();
             EmbeddingStore<TextSegment> embeddingStore = Neo4jEmbeddingStore.builder()
                     .withBasicAuth(neo4j.getBoltUrl(), "neo4j", neo4j.getAdminPassword())
