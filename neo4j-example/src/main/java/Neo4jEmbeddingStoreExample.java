@@ -95,6 +95,7 @@ public class Neo4jEmbeddingStoreExample {
 
     private static void searchEmbeddingsWithAddAllWithMetadataMaxResultsAndMinScore() {
         
+        // tag::test[]
         TextSegment segment1 = TextSegment.from("I like football.", Metadata.from("test-key-1", "test-value-1"));
         Embedding embedding1 = embeddingModel.embed(segment1).content();
 
@@ -119,5 +120,6 @@ public class Neo4jEmbeddingStoreExample {
             System.out.println(match.score()); // 0.8144289255142212
             System.out.println(match.embedded().text()); // I like football. || I like basketball.
         });
+        // end::test[]
     }
 }
