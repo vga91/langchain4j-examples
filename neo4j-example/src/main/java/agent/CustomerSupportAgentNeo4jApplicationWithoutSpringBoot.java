@@ -3,35 +3,19 @@ package agent;
 
 import dev.langchain4j.community.store.embedding.neo4j.Neo4jEmbeddingStore;
 import dev.langchain4j.community.store.memory.chat.neo4j.Neo4jChatMemoryStore;
-import dev.langchain4j.data.document.Document;
-import dev.langchain4j.data.document.DocumentSplitter;
-import dev.langchain4j.data.document.parser.TextDocumentParser;
-import dev.langchain4j.data.document.splitter.DocumentSplitters;
-import dev.langchain4j.data.embedding.Embedding;
-import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.onnx.allminilml6v2q.AllMiniLmL6V2QuantizedEmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
-import dev.langchain4j.service.AiServices;
-import dev.langchain4j.store.embedding.EmbeddingMatch;
-import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
-import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
 import org.testcontainers.containers.Neo4jContainer;
+import util.Utils;
 
-import java.io.File;
-import java.net.URI;
-import java.nio.file.Paths;
-import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-import static dev.langchain4j.data.document.loader.FileSystemDocumentLoader.loadDocument;
+import static agent.CustomerUtil.createAssistant;
+import static agent.CustomerUtil.createEmbeddingStore;
 import static dev.langchain4j.model.openai.OpenAiChatModelName.GPT_4_O_MINI;
 
-// TODO --> CustomerSupportAgentApplicationTest di azure-openai
 
 /**
  * example prompt: `What is the cancellation policy?`
@@ -58,10 +42,10 @@ public class CustomerSupportAgentNeo4jApplicationWithoutSpringBoot {
                     .withBasicAuth(neo4j.getBoltUrl(), "neo4j", neo4j.getAdminPassword())
                     .build();
 
-            Neo4jEmbeddingStore embeddingStore = getEmbeddingStore(neo4j, embeddingModel);
+            Neo4jEmbeddingStore embeddingStore = createEmbeddingStore(neo4j, embeddingModel);
 
 
-            CustomerUtil.Assistant assistant = getAssistant(chatModel, chatMemoryStore);
+            Utils.Assistant assistant = createAssistant(chatModel, chatMemoryStore);
 
             CustomerUtil.AssistantService service = new CustomerUtil.AssistantService(assistant, embeddingStore, embeddingModel);
 
@@ -85,36 +69,6 @@ public class CustomerSupportAgentNeo4jApplicationWithoutSpringBoot {
                 }
             }
         }
-    }
-
-    public static CustomerUtil.Assistant getAssistant(ChatModel chatModel, Neo4jChatMemoryStore chatMemoryStore) {
-        // Create assistant with memory support
-        return AiServices.builder(CustomerUtil.Assistant.class)
-                .chatModel(chatModel)
-                .chatMemoryProvider(sessionId -> MessageWindowChatMemory.builder()
-                        .id(sessionId)
-                        .chatMemoryStore(chatMemoryStore)
-                        .maxMessages(10)
-                        .build())
-                .build();
-    }
-
-    public static Neo4jEmbeddingStore getEmbeddingStore(Neo4jContainer<?> neo4j, EmbeddingModel embeddingModel) {
-        Neo4jEmbeddingStore embeddingStore = Neo4jEmbeddingStore.builder()
-                .withBasicAuth(neo4j.getBoltUrl(), "neo4j", neo4j.getAdminPassword())
-                .dimension(384)
-                .build();
-
-        final URI uri = new File("neo4j-example/src/main/resources/miles-of-smiles-terms-of-use.txt").toURI();
-        Document document = loadDocument(Paths.get(uri), new TextDocumentParser());
-        DocumentSplitter documentSplitter = DocumentSplitters.recursive(100, 0);
-        EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
-                .documentSplitter(documentSplitter)
-                .embeddingModel(embeddingModel)
-                .embeddingStore(embeddingStore)
-                .build();
-        ingestor.ingest(document);
-        return embeddingStore;
     }
 
     // AI service interface

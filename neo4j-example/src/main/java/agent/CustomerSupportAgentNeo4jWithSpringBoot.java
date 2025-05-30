@@ -3,16 +3,10 @@ package agent;
 
 import dev.langchain4j.community.store.embedding.neo4j.Neo4jEmbeddingStore;
 import dev.langchain4j.community.store.memory.chat.neo4j.Neo4jChatMemoryStore;
-import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.embedding.onnx.allminilml6v2q.AllMiniLmL6V2QuantizedEmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiChatModel;
-import dev.langchain4j.service.AiServices;
-import dev.langchain4j.service.spring.AiService;
-import dev.langchain4j.store.embedding.EmbeddingMatch;
-import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationRunner;
@@ -21,14 +15,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.testcontainers.containers.Neo4jContainer;
+import util.Utils;
 
-import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
-import static agent.CustomerSupportAgentNeo4jApplicationWithoutSpringBoot.getAssistant;
-import static agent.CustomerSupportAgentNeo4jApplicationWithoutSpringBoot.getEmbeddingStore;
+import static agent.CustomerUtil.createAssistant;
+import static agent.CustomerUtil.createEmbeddingStore;
 
+/**
+ * example prompt: `What is the cancellation policy?`
+ */
 @SpringBootApplication
 public class CustomerSupportAgentNeo4jWithSpringBoot {
 
@@ -46,7 +42,7 @@ public class CustomerSupportAgentNeo4jWithSpringBoot {
 
         @Bean
         public Neo4jEmbeddingStore embeddingStore() {
-            return getEmbeddingStore(container, embeddingModel());
+            return createEmbeddingStore(container, embeddingModel());
         }
 
         @Bean
@@ -70,12 +66,12 @@ public class CustomerSupportAgentNeo4jWithSpringBoot {
         }
 
         @Bean
-        public CustomerUtil.Assistant assistant(ChatModel chatLanguageModel, Neo4jChatMemoryStore chatMemoryStore) {
-            return getAssistant(chatLanguageModel, chatMemoryStore);
+        public Utils.Assistant assistant(ChatModel chatLanguageModel, Neo4jChatMemoryStore chatMemoryStore) {
+            return createAssistant(chatLanguageModel, chatMemoryStore);
         }
 
         @Bean
-        public CustomerUtil.AssistantService assistantService(CustomerUtil.Assistant assistant, Neo4jEmbeddingStore embeddingStore,
+        public CustomerUtil.AssistantService assistantService(Utils.Assistant assistant, Neo4jEmbeddingStore embeddingStore,
                                                               EmbeddingModel embeddingModel) {
             return new CustomerUtil.AssistantService(assistant, embeddingStore, embeddingModel);
         }
